@@ -1,0 +1,19 @@
+---
+- name: Backup Dell OS10 Switch Configuration
+  hosts: dell  
+  gather_facts: yes 
+
+  tasks:
+    - name: Backup current switch config (dellos10)
+      dellemc.os10.os10_config:
+        backup: yes
+        backup_options:
+          dir_path: "/etc/ansible/dell_folder"
+          filename: "{{ inventory_hostname }}_{{ ansible_date_time.date }}.cfg"
+      register: backup_dellos10_location
+      when: ansible_network_os == 'dellemc.os10.os10'
+
+    - name: Display backup location
+      debug:
+        msg: "Backup stored at {{ backup_dellos10_location.backup_path }}"
+      when: backup_dellos10_location.backup_path is defined

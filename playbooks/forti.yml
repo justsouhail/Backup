@@ -1,0 +1,33 @@
+---
+- name: General Config
+  hosts: fortigates
+  gather_facts: true
+  collections:
+    - fortinet.fortios
+
+  vars:
+    new_hostname: "fw1"
+    vdom: "root"
+
+  tasks:
+
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
+
+    - name: Backup fortinet current config
+      fortios_monitor_fact:
+        vdom:  "{{ vdom }}"
+        selector: 'system_config_backup'
+        params:
+          scope: "global"
+      register: full_config
+
+
+    - name: Save Full Configuration 
+      copy:
+        content: '{{ full_config.meta.raw  }}'
+        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ ansible_date_time.date }}.cfg'
+
+

@@ -1,0 +1,50 @@
+---
+- name: General Config for Routers
+  hosts: routers
+  gather_facts: true  
+  vars:
+    hostname: "{{ inventory_hostname }}"
+  tasks:
+    # - name: Add Banner
+    #   cisco.ios.ios_banner:
+    #     banner: login
+    #     text: |
+    #       Wasssssssssssuuuuuuuuuup
+    #     state: present
+
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
+    - name: Configurable backup path
+      cisco.ios.ios_config:
+        src: ios_template.j2
+        backup: true
+        backup_options:
+          filename: "{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+          dir_path: "/etc/ansible/cisco_folder/RT"
+
+- name: General Config for Switches
+  hosts: switches
+  gather_facts: yes 
+  vars:
+    hostname: "{{ inventory_hostname }}"
+  tasks:
+    # - name: Add Banner
+    #   cisco.ios.ios_banner:
+    #     banner: login
+    #     text: |
+    #       Wasssssssssssuuuuuuuuuup
+    #     state: present
+    
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
+    - name: Configurable backup path
+      cisco.ios.ios_config:
+        src: ios_template.j2
+        backup: true
+        backup_options:
+          filename: "{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+          dir_path: "/etc/ansible/cisco_folder/SW"

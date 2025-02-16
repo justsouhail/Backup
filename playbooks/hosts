@@ -1,0 +1,57 @@
+[routers]
+R1 ansible_host=192.168.11.25
+R2 ansible_host=192.168.11.26
+[routers:vars]
+ansible_user=souhail
+ansible_password=123
+ansible_connection=network_cli
+ansible_network_os=ios
+
+
+[switches]
+SW2  ansible_host=192.168.11.28
+[switches:vars]
+ansible_user=souhail
+ansible_password=123
+ansible_connection=network_cli
+ansible_network_os=ios
+
+
+
+
+
+[fortigates]
+fgt ansible_host=192.168.11.66 ansible_user=admin ansible_password=ertdfgcvb
+
+[fortigates:vars]
+ansible_network_os=fortinet.fortios.fortios
+[all:vars]
+
+ansible_connection=httpapi
+
+ansible_httpapi_validate_certs=no
+
+ansible_httpapi_use_ssl=no
+
+
+
+
+
+[dell]
+DEll1 ansible_host=192.168.11.152 ansible_net_os_name=dellos10
+
+[dell:vars]
+ansible_connection= ansible.netcommon.network_cli
+ansible_network_os= dellemc.os10.os101
+ansible_user= admin
+ansible_password= ertdfgcvb
+ansible_become= true
+ansible_become_method= enable
+ansible_become_password= !vault...
+
+[paloAltos]
+palo ansible_host=192.168.11.160
+
+[paloAltos:vars]
+ansible_connection=local
+os=panos
