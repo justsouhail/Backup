@@ -60,6 +60,11 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 | Server      | Ubuntu      |  SFTP         |  |
 
 
+## Hosts inventory 
+
+### **📂 Playbook Location**  
+📁 `playbooks/cisco_switch_backup.yml`
+
 
 
 
