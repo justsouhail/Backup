@@ -4,14 +4,15 @@
 
 
 ## Table of Contents
-- [Introduction](#introduction)
-- [Topology](#topology)
-- [Steps](#steps)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- [Introduction](#introduction)  
+- [Topology](#topology)  
+- [Steps](#steps)  
+- [Device IP Address Table](#device-ip-address-table)  
+- [Hosts Inventory](#hosts-inventory)  
+- [Cisco Routers / Switches](#cisco-routers--switches)  
+- [Dell](#dell)  
+
+
 
 ## Introduction
 I'm developing an Ansible-based backup automation project for firewalls (Fortinet, Palo Alto, F5) and network devices (Cisco switches and routers). The project includes a web interface to manage and monitor the automation process. Initially, I'm using PNetLab for simulation, with plans to transition to real-world scenarios for deployment and testing.
