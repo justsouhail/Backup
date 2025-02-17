@@ -230,7 +230,7 @@ os=panos
 ##  fortigate 
 
 ### Firewall model
-![Project Logo](assets/dell.png)
+![Project Logo](assets/forti.png)
 
 
 
@@ -277,7 +277,7 @@ os=panos
 ##  Palo Alto
 
 ### Firewall model
-![Project Logo](assets/dell.png)
+![Project Logo](assets/palo.png)
 
 
 ### Resources
@@ -363,5 +363,6 @@ chmod 600 vault_pass.key     `
 
 4- results
 
+![Project Logo](assets/palo_folder.png)
 
 
