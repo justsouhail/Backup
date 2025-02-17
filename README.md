@@ -35,6 +35,7 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
   - [ ] **Fortinet** backup  
   - [ ] **Palo Alto** backup  
   - [ ] **Cisco switches/routers** backup
+  - [ ] **Dell switches/routers** backup
   - [ ] **F5** backup  
 - [ ] Implement a  FTP  solution  
 - [ ] Schedule automated backups
@@ -224,5 +225,143 @@ os=panos
       when: backup_dellos10_location.backup_path is defined
 
 ```
+
+
+##  fortigate 
+
+### Firewall model
+![Project Logo](assets/dell.png)
+
+
+
+
+
+### **📂** Playbook Location: `playbooks/forti.yml`**  
+```yaml
+---
+- name: General Config
+  hosts: fortigates
+  gather_facts: true
+  collections:
+    - fortinet.fortios
+
+  vars:
+    new_hostname: "fw1"
+    vdom: "root"
+
+  tasks:
+
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
+
+    - name: Backup fortinet current config
+      fortios_monitor_fact:
+        vdom:  "{{ vdom }}"
+        selector: 'system_config_backup'
+        params:
+          scope: "global"
+      register: full_config
+
+
+    - name: Save Full Configuration 
+      copy:
+        content: '{{ full_config.meta.raw  }}'
+        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ ansible_date_time.date }}.cfg'
+
+
+
+```
+
+##  Palo Alto
+
+### Firewall model
+![Project Logo](assets/dell.png)
+
+
+### Resources
+[Playbook  Source](https://cs7networks.co.uk/2020/07/20/ansible-export-palo-alto-config/)
+
+### 1- create a vault file 
+Ansible Vault is a feature of ansible that allows you to keep sensitive data such as passwords or keys in encrypted files, rather than as plaintext in playbooks or roles. These vault files can then be distributed or placed in source control.
+
+1.1 Run the command `ansible-vault create ~/rest_creds.yml` to create it  (  give it a passsword)
+
+
+1.2. Add a the palo alto user and pass that has privilege to get API from firewall
+```ini
+pa_rest_user: admin
+pa_rest_password: Palo@1234!
+
+```
+1.3 add the password you gave to the vault_pass.key so that we dont need every time to enter it    
+`echo 123> vault_pass.key
+chmod 600 vault_pass.key     `
+
+
+
+### 2- create the playbook
+
+
+### **📂** Playbook Location: `playbooks/Palo.yml`**  
+```yaml
+---
+- name: Export PA configs
+  hosts: paloAltos
+  connection: local
+  gather_facts: no
+  strategy: linear
+  vars_files:
+    - ~/rest_creds.yml
+
+  tasks:
+    - name: Get REST API Key
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
+        return_content: yes
+        method: GET
+      register: response_api_key
+
+    - name: Read XML response
+      xml: 
+        content: 'text'
+        xmlstring: '{{ response_api_key.content }}'
+        xpath: '/response/result/key'
+      register: api_key 
+
+    - name: Gather config
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
+        return_content: yes
+      register: response_pa_config
+
+    - name: Save initial config
+      copy:
+        content: "{{ response_pa_config.content }}"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+    - name: Remove unwanted closing tags
+      replace:
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        regexp: '</result></response>'
+        replace: ''
+
+    - name: Remove extra newlines at end of file
+      shell: |
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+
+```
+
+3-  run the command 
+`ansible-playbook --vault-password-file vault_pass.key /etc/ansible/palo.yml   `
+
+
+
+4- results
+
 
 
