@@ -286,7 +286,7 @@ os=panos
 ### 1- create a vault file 
 Ansible Vault is a feature of ansible that allows you to keep sensitive data such as passwords or keys in encrypted files, rather than as plaintext in playbooks or roles. These vault files can then be distributed or placed in source control.
 
-1.1 Run the command `ansible-vault create ~/rest_creds.yml` to create it  (  give it a passsword)
+1.1 Run the command `ansible-vault create ~/rest_creds.yml` to create it  (  give it a passsword ex : 123)
 
 
 1.2. Add a the palo alto user and pass that has privilege to get API from firewall
@@ -295,10 +295,12 @@ pa_rest_user: admin
 pa_rest_password: Palo@1234!
 
 ```
-1.3 add the password you gave to the vault_pass.key so that we dont need every time to enter it    
-`echo 123> vault_pass.key
+1.3 add the password you gave to the vault_pass.key so that we dont need every time to enter it 
+```bash
+echo 123> vault_pass.key
 chmod 600 vault_pass.key     `
 
+```
 
 
 ### 2- create the playbook
