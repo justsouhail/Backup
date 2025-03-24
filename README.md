@@ -21,13 +21,13 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 ![Project Logo](assets/pnetlogo.png)
 
 
-## Steps
+# Steps
 
 ### 🔹 **Phase 1: Environment Setup**  
 - [ ] Set up **PNetLab** with firewall and network device images  
 - [ ] Install **Ansible** and required dependencies  
 - [ ] Configure SSH & API access for devices
-- [ ] Configure SSH users on network devices  
+- [ ] Configure  users on network devices  
 - [ ] Define Ansible inventory for network devices  
 
 ### 🔹 **Phase 2: Backup Automation**  
@@ -49,18 +49,65 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 - [ ] Deploy to real devices in a **test environment**
 
 
-## Device IP Address Table  
+# Device IP Address Table  
 
 | Device Type   | Vendor     | Hostname     | IP Address     |
 |--------------|-----------|-------------|--------------|
-| Firewall     | Fortinet   | FW1  | 192.168.11.66  |
-| Firewall     | Palo Alto  | PA-VM-1      | 192.168.11.160  |
-| Firewall     | F5         | F5-LTM-1     |   |
+| Firewall     | Fortinet   | FW1  | 192.168.11.190  |
+| Firewall     | Palo Alto  | palo      | 192.168.11.160  |
+| Firewall     | F5         | F5-LTM-1     | 192.168.11.170  |
 | Switch       | Cisco      | SW   | 192.168.11.28 |
 | Router       | Cisco      | R1           | 192.168.11.25 |
 | Router       | Cisco      | R2           | 192.168.11.26 |
-| Server      | Ubuntu      | Control node           | 192.168.11.100 |
-| Server      | Ubuntu      |  SFTP         |  |
+| Switch       | Dell      | dell1           | 192.168.11.166 |
+| Server      | Ubuntu      | Control node           | 192.168.11.135 |
+| Server      | Ubuntu      |  SFTP         |  192.168.11.165|
+
+
+# Setting up Users on network devices 
+
+## 1- Cisco User
+```ini
+crypto key generate rsa : 1024
+ip ssh version 2
+line vty 0 4
+ login local
+ transport input ssh
+username souhail privilege 15 password 0 123
+
+```
+
+
+## 2- Fortigate User
+![Project Logo](assets/pnetlogo.png)
+
+```ini
+Create a admin profile  (ansible ) with read & Write in the system access control 
+
+```
+![Project Logo](assets/pnetlogo.png)
+```ini
+Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
+
+```
+
+## 3- Paloalto User
+![Project Logo](assets/pnetlogo.png)
+
+```ini
+Create a admin profile  (ansible ) with read & Write in the system access control 
+
+```
+![Project Logo](assets/pnetlogo.png)
+```ini
+Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
+
+```
+
+
+
+
+
 
 
 ## Hosts inventory 
