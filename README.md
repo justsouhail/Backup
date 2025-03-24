@@ -417,7 +417,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ##  4 - F5
 
 ### Firewall model
-![Project Logo](assets/palo.png)
+![Project Logo](assets/f5mode.png)
 
 
 
@@ -479,7 +479,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ##  5- dell
 
 ### switch model
-![Project Logo](assets/palo.png)
+![Project Logo](assets/dellmode.png)
 
 
 
