@@ -92,11 +92,14 @@ Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 ```
 
 ## 3- Paloalto User
-![Project Logo](assets/pnetlogo.png)
 
 ```ini
-Create a admin profile  (ansible ) with read & Write in the system access control 
-
+Create Use back
+> configure
+# set mgt-config users <name> password
+# set mgt-config users <name> permissions role-based devicereader
+# commit
+# exit
 ```
 ![Project Logo](assets/pnetlogo.png)
 ```ini
@@ -189,6 +192,7 @@ os=panos
 
 
 
+
 ### **📂** Playbook Location: `playbooks/forti.yml`**  
 ```yaml
 ---
@@ -226,6 +230,71 @@ os=panos
 
 
 ```
+
+##  Palo Alto
+
+### Firewall model
+![Project Logo](assets/palo.png)
+
+
+### Resources
+[Playbook  Source](https://cs7networks.co.uk/2020/07/20/ansible-export-palo-alto-config/)
+
+
+
+### **📂** Playbook Location: `playbooks/Palo.yml`**  
+```yaml
+---
+- name: Export PA configs
+  hosts: paloAltos
+  connection: local
+  gather_facts: no
+  strategy: linear
+  vars_files:
+    - ~/rest_creds.yml
+
+  tasks:
+    - name: Get REST API Key
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
+        return_content: yes
+        method: GET
+      register: response_api_key
+
+    - name: Read XML response
+      xml: 
+        content: 'text'
+        xmlstring: '{{ response_api_key.content }}'
+        xpath: '/response/result/key'
+      register: api_key 
+
+    - name: Gather config
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
+        return_content: yes
+      register: response_pa_config
+
+    - name: Save initial config
+      copy:
+        content: "{{ response_pa_config.content }}"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+    - name: Remove unwanted closing tags
+      replace:
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        regexp: '</result></response>'
+        replace: ''
+
+    - name: Remove extra newlines at end of file
+      shell: |
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+
+```
+
+
 
 
 
