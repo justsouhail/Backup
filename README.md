@@ -316,7 +316,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ---
 - name: General Config
   hosts: fortigates
-  gather_facts: true
+  gather_facts: false
   collections:
     - fortinet.fortios
 
@@ -343,8 +343,16 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
     - name: Save Full Configuration 
       copy:
         content: '{{ full_config.meta.raw  }}'
-        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ ansible_date_time.date }}.cfg'
+        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ timestamp.stdout }}.cfg'
 
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/forti_folder/{{inventory_hostname}}_{{ timestamp.stdout }}.cfg  /home/storage/backup/forti
+        exit
+        EOF
+      no_log: true 
 
 
 ```
@@ -368,10 +376,12 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
   connection: local
   gather_facts: no
   strategy: linear
-  vars_files:
-    - ~/rest_creds.yml
 
   tasks:
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
     - name: Get REST API Key
       uri:
         validate_certs: no
@@ -397,19 +407,25 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
     - name: Save initial config
       copy:
         content: "{{ response_pa_config.content }}"
-        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
 
     - name: Remove unwanted closing tags
       replace:
-        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
         regexp: '</result></response>'
         replace: ''
 
     - name: Remove extra newlines at end of file
       shell: |
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
 
-
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml  /home/storage/backup/palo
+        exit
+        EOF
+      no_log: true 
 ```
 
 
@@ -425,53 +441,47 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ### **📂** Playbook Location: `playbooks/big.yml`**  
 ```yaml
 ---
-- name: Export PA configs
-  hosts: paloAltos
+- name: Create and Download UCS backup for F5 BIG-IP
+  hosts: lb
   connection: local
-  gather_facts: no
-  strategy: linear
-  vars_files:
-    - ~/rest_creds.yml
-
+  vars:
+    backup_file_name: "{{ inventory_hostname }}-{{ ansible_date_time.date }}"
+    provider:
+      user: "{{ inventory_user }}"
+      server: "{{ inventory_host }}"
+      server_port: "{{ inventory_port }}"
+      password: "{{ inventory_pass }}"
+      transport: rest
+      timeout: 600
+      validate_certs: no
+  gather_facts: true
+  
   tasks:
-    - name: Get REST API Key
-      uri:
-        validate_certs: no
-        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
-        return_content: yes
-        method: GET
-      register: response_api_key
-
-    - name: Read XML response
-      xml: 
-        content: 'text'
-        xmlstring: '{{ response_api_key.content }}'
-        xpath: '/response/result/key'
-      register: api_key 
-
-    - name: Gather config
-      uri:
-        validate_certs: no
-        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
-        return_content: yes
-      register: response_pa_config
-
-    - name: Save initial config
-      copy:
-        content: "{{ response_pa_config.content }}"
-        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
-
-    - name: Remove unwanted closing tags
-      replace:
-        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
-        regexp: '</result></response>'
-        replace: ''
-
-    - name: Remove extra newlines at end of file
+    - name: Create a new UCS and Download
+      f5networks.f5_modules.bigip_ucs_fetch:
+        async_timeout: 1200
+        src: "{{ backup_file_name }}.ucs"
+        dest: "/etc/ansible/F5/{{ backup_file_name }}.ucs"
+        create_on_missing: true
+        only_create_file: false
+        fail_on_missing: false
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      
+    - name: Remove the UCS from the device
+      f5networks.f5_modules.bigip_ucs:
+        ucs: "{{ backup_file_name }}.ucs"
+        state: absent
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      
+    - name: Copy file 
       shell: |
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
-
-
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/F5/{{ backup_file_name }}.ucs  /home/storage/backup/
+        exit
+        EOF
+      no_log: true 
 ```
 
 
@@ -487,51 +497,29 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ### **📂** Playbook Location: `playbooks/big.yml`**  
 ```yaml
 ---
-- name: Export PA configs
-  hosts: paloAltos
-  connection: local
-  gather_facts: no
-  strategy: linear
-  vars_files:
-    - ~/rest_creds.yml
+- name: Backup Dell OS10 Switch Configuration
+  hosts: dell  
+  gather_facts: no 
 
   tasks:
-    - name: Get REST API Key
-      uri:
-        validate_certs: no
-        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
-        return_content: yes
-        method: GET
-      register: response_api_key
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
 
-    - name: Read XML response
-      xml: 
-        content: 'text'
-        xmlstring: '{{ response_api_key.content }}'
-        xpath: '/response/result/key'
-      register: api_key 
+    - name: Backup current switch config (dellos10)
+      dellemc.os10.os10_config:
+        backup: yes
+        backup_options:
+          dir_path: "/etc/ansible/dell_folder"
+          filename: "{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+      register: backup_dellos10_location
+      when: ansible_network_os == 'dellemc.os10.os10'
 
-    - name: Gather config
-      uri:
-        validate_certs: no
-        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
-        return_content: yes
-      register: response_pa_config
+    - name: Display backup location
+      debug:
+        msg: "Backup stored at {{ backup_dellos10_location.backup_path }}"
+      when: backup_dellos10_location.backup_path is defined
 
-    - name: Save initial config
-      copy:
-        content: "{{ response_pa_config.content }}"
-        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
-
-    - name: Remove unwanted closing tags
-      replace:
-        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
-        regexp: '</result></response>'
-        replace: ''
-
-    - name: Remove extra newlines at end of file
-      shell: |
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
 
 
 ```
