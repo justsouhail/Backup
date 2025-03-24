@@ -211,7 +211,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 ## 1-  cisco 
 
 ### cisco  model
-![Project Logo](assets/forti.png)
+![Project Logo](assets/usermode.png)
 
 ### **📂** Playbook Location: `playbooks/cisco.yml`**  
 
