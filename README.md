@@ -26,7 +26,8 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 ### 🔹 **Phase 1: Environment Setup**  
 - [ ] Set up **PNetLab** with firewall and network device images  
 - [ ] Install **Ansible** and required dependencies  
-- [ ] Configure SSH & API access for devices  
+- [ ] Configure SSH & API access for devices
+- [ ] Configure SSH users on network devices  
 - [ ] Define Ansible inventory for network devices  
 
 ### 🔹 **Phase 2: Backup Automation**  
@@ -38,6 +39,7 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
   - [ ] **F5** backup  
 - [ ] Implement a  FTP  solution  
 - [ ] Schedule automated backups
+- [ ] password management
 
 ### 🔹 **Phase 3: Web Interface Development**  
 - [ ] Design a **dashboard** for backup management  
@@ -54,7 +56,7 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 | Firewall     | Fortinet   | FW1  | 192.168.11.66  |
 | Firewall     | Palo Alto  | PA-VM-1      | 192.168.11.160  |
 | Firewall     | F5         | F5-LTM-1     |   |
-| Switch       | Cisco      | SW-Core-1    | 192.168.11.28 |
+| Switch       | Cisco      | SW   | 192.168.11.28 |
 | Router       | Cisco      | R1           | 192.168.11.25 |
 | Router       | Cisco      | R2           | 192.168.11.26 |
 | Server      | Ubuntu      | Control node           | 192.168.11.100 |
