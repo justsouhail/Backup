@@ -133,10 +133,10 @@ Create Use back
 
 
 
-## Hosts inventory 
+# Hosts inventory 
  
 
-### **📂** Playbook Location: `playbooks/hosts`**  
+##  **📂** Playbook Location: `playbooks/hosts`**  
 
 ```ini
 [routers]
@@ -206,12 +206,15 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 
 ```
 
-
+# Playbooks
 
 ## 1-  cisco 
 
 ### cisco  model
 ![Project Logo](assets/forti.png)
+
+### **📂** Playbook Location: `playbooks/cisco.yml`**  
+
 
 ```yaml
 ---
@@ -346,7 +349,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 
 ```
 
-##  Palo Alto
+## 3-  Palo Alto
 
 ### Firewall model
 ![Project Logo](assets/palo.png)
@@ -411,6 +414,127 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 
 
 
+##  4 - F5
+
+### Firewall model
+![Project Logo](assets/palo.png)
+
+
+
+
+### **📂** Playbook Location: `playbooks/big.yml`**  
+```yaml
+---
+- name: Export PA configs
+  hosts: paloAltos
+  connection: local
+  gather_facts: no
+  strategy: linear
+  vars_files:
+    - ~/rest_creds.yml
+
+  tasks:
+    - name: Get REST API Key
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
+        return_content: yes
+        method: GET
+      register: response_api_key
+
+    - name: Read XML response
+      xml: 
+        content: 'text'
+        xmlstring: '{{ response_api_key.content }}'
+        xpath: '/response/result/key'
+      register: api_key 
+
+    - name: Gather config
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
+        return_content: yes
+      register: response_pa_config
+
+    - name: Save initial config
+      copy:
+        content: "{{ response_pa_config.content }}"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+    - name: Remove unwanted closing tags
+      replace:
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        regexp: '</result></response>'
+        replace: ''
+
+    - name: Remove extra newlines at end of file
+      shell: |
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+
+```
+
+
+
+##  5- dell
+
+### switch model
+![Project Logo](assets/palo.png)
+
+
+
+
+### **📂** Playbook Location: `playbooks/big.yml`**  
+```yaml
+---
+- name: Export PA configs
+  hosts: paloAltos
+  connection: local
+  gather_facts: no
+  strategy: linear
+  vars_files:
+    - ~/rest_creds.yml
+
+  tasks:
+    - name: Get REST API Key
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=keygen&user={{ pa_rest_user }}&password={{ pa_rest_password }}'
+        return_content: yes
+        method: GET
+      register: response_api_key
+
+    - name: Read XML response
+      xml: 
+        content: 'text'
+        xmlstring: '{{ response_api_key.content }}'
+        xpath: '/response/result/key'
+      register: api_key 
+
+    - name: Gather config
+      uri:
+        validate_certs: no
+        url: 'https://{{ ansible_host }}/api/?type=config&action=show&key={{ api_key.matches[0].key }}'
+        return_content: yes
+      register: response_pa_config
+
+    - name: Save initial config
+      copy:
+        content: "{{ response_pa_config.content }}"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+    - name: Remove unwanted closing tags
+      replace:
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        regexp: '</result></response>'
+        replace: ''
+
+    - name: Remove extra newlines at end of file
+      shell: |
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+
+
+```
 
 
 
