@@ -92,6 +92,7 @@ Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 ```
 
 ## 3- Paloalto User
+![Project Logo](assets/userpalopng)
 
 ```ini
 Create Use back
@@ -101,11 +102,7 @@ Create Use back
 # commit
 # exit
 ```
-![Project Logo](assets/pnetlogo.png)
-```ini
-Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 
-```
 
 
 
