@@ -95,8 +95,8 @@ Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 ![Project Logo](assets/userpalo.png)
 
 ```ini
-Create Use back
-> configure
+Create User 
+# configure
 # set mgt-config users <name> password
 # set mgt-config users <name> permissions role-based devicereader
 # commit
