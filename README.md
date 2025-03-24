@@ -92,7 +92,33 @@ Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 ```
 
 ## 3- Paloalto User
-![Project Logo](assets/userpalopng)
+![Project Logo](assets/userpalo.png)
+
+```ini
+Create Use back
+> configure
+# set mgt-config users <name> password
+# set mgt-config users <name> permissions role-based devicereader
+# commit
+# exit
+```
+
+
+## 4- F5 User
+![Project Logo](assets/userpalo.png)
+
+```ini
+Create Use back
+> configure
+# set mgt-config users <name> password
+# set mgt-config users <name> permissions role-based devicereader
+# commit
+# exit
+```
+
+
+## 5- dell  User
+![Project Logo](assets/userpalo.png)
 
 ```ini
 Create Use back
@@ -107,16 +133,12 @@ Create Use back
 
 
 
-
-
-
 ## Hosts inventory 
  
 
 ### **📂** Playbook Location: `playbooks/hosts`**  
 
 ```ini
-
 [routers]
 R1 ansible_host=192.168.11.25
 R2 ansible_host=192.168.11.26
@@ -140,7 +162,7 @@ ansible_network_os=ios
 
 
 [fortigates]
-fgt ansible_host=192.168.11.66 ansible_user=admin ansible_password=ertdfgcvb
+fgt ansible_host=192.168.11.190  ansible_user=backup ansible_password=ertdfgcvb
 
 [fortigates:vars]
 ansible_network_os=fortinet.fortios.fortios
@@ -157,11 +179,11 @@ ansible_httpapi_use_ssl=no
 
 
 [dell]
-DEll1 ansible_host=192.168.11.152 ansible_net_os_name=dellos10
+DEll1 ansible_host=192.168.11.166 ansible_net_os_name=dellos10
 
 [dell:vars]
 ansible_connection= ansible.netcommon.network_cli
-ansible_network_os= dellemc.os10.os101
+ansible_network_os=dellemc.os10.os10
 ansible_user= admin
 ansible_password= ertdfgcvb
 ansible_become= true
@@ -169,18 +191,114 @@ ansible_become_method= enable
 ansible_become_password= !vault...
 
 [paloAltos]
-palo ansible_host=192.168.11.160
+palo ansible_host=192.168.11.160  pa_rest_user=backup pa_rest_password=Palo@1234!
 
 [paloAltos:vars]
 ansible_connection=local
 os=panos
 
 
+
+[lb]
+f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1234! inventory_network_os=f5.bigip inventory_port=443
+
+
+
 ```
 
 
 
-##  fortigate 
+## 1-  cisco 
+
+### cisco  model
+![Project Logo](assets/forti.png)
+
+```yaml
+---
+- name: General Config for Routers
+  hosts: routers
+  gather_facts: true  
+  vars:
+    hostname: "{{ inventory_hostname }}"
+  tasks:
+    # - name: Add Banner
+    #   cisco.ios.ios_banner:
+    #     banner: login
+    #     text: |
+    #       Wasssssssssssuuuuuuuuuup
+    #     state: present
+
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
+    - name: Get router running config
+      cisco.ios.ios_command:
+        commands: show running-config
+      register: router_config
+
+    - name: Save config to local temp file
+      ansible.builtin.copy:
+        content: "{{ router_config.stdout[0] }}"
+        dest: "/etc/ansible/cisco_folder/RT/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+      delegate_to: localhost
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/cisco_folder/RT/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/RT
+        exit
+        EOF
+      no_log: true 
+
+
+- name: Backup Switch Config 
+  hosts: switches
+  gather_facts: no
+
+  tasks:
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+      delegate_to: localhost
+    
+    - name: Get switch running config
+      cisco.ios.ios_command:
+        commands: show running-config
+      register: switch_config
+    
+    - name: Save config to local temp file
+      ansible.builtin.copy:
+        content: "{{ switch_config.stdout[0] }}"
+        dest: "/etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+      delegate_to: localhost
+
+
+    # - name: Copy file using sftp
+    #   shell: |
+    #     echo "put /tmp/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg /home/storage/backup/" | sftp souhail_backup@192.168.11.165
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/SW
+        exit
+        EOF
+      no_log: true 
+    
+  
+  
+  
+  
+
+
+```
+
+
+
+
+
+## 2-  fortigate 
 
 ### Firewall model
 ![Project Logo](assets/forti.png)
