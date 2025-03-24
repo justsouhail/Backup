@@ -79,13 +79,13 @@ username souhail privilege 15 password 0 123
 
 
 ## 2- Fortigate User
-![Project Logo](assets/pnetlogo.png)
+![Project Logo](assets/userforti.png)
 
 ```ini
 Create a admin profile  (ansible ) with read & Write in the system access control 
 
 ```
-![Project Logo](assets/pnetlogo.png)
+![Project Logo](assets/userforti2.png)
 ```ini
 Create a administrator (backup : ertdfgcvb ) with adminstrator profile ansible
 
