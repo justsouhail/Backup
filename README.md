@@ -549,6 +549,10 @@ crontab -e
 
 
 #  set up sftp server
-
+#### Add group & User 
+```ini 
+ groupadd sftp
+ userad  
+```
 
 
