@@ -105,7 +105,7 @@ Create User
 
 
 ## 4- F5 User
-![Project Logo](assets/f5usermode.png)
+![Project Logo](assets/f5modeuser.png)
 
 ```ini
 The user with backup privilege  is Administrator
