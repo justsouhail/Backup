@@ -116,12 +116,9 @@ The user with backup privilege  is Administrator
 ![Project Logo](assets/userpalo.png)
 
 ```ini
-Create Use back
-> configure
-# set mgt-config users <name> password
-# set mgt-config users <name> permissions role-based devicereader
-# commit
-# exit
+
+username souhail password **** role sysadmin priv-lvl 15 password-expiry 180
+
 ```
 
 
@@ -174,13 +171,13 @@ ansible_httpapi_use_ssl=no
 
 
 [dell]
-DEll1 ansible_host=192.168.11.166 ansible_net_os_name=dellos10
+DEll1 ansible_host=192.168.11.169  ansible_net_os_name=dellos10
 
 [dell:vars]
 ansible_connection= ansible.netcommon.network_cli
 ansible_network_os=dellemc.os10.os10
-ansible_user= admin
-ansible_password= ertdfgcvb
+ansible_user= souhail
+ansible_password= Ansible@0987!
 ansible_become= true
 ansible_become_method= enable
 ansible_become_password= !vault...
@@ -196,6 +193,8 @@ os=panos
 
 [lb]
 f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1234! inventory_network_os=f5.bigip inventory_port=443
+
+
 
 
 
@@ -516,8 +515,40 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
       when: backup_dellos10_location.backup_path is defined
 
 
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/dell_folder/{{inventory_hostname}}_{{ timestamp.stdout }}.cfg  /home/storage/backup/dell
+        exit
+        EOF
+      no_log: true 
 
 ```
+
+
+#  Schedule automated backups crontab
+
+
+
+#### Pour automatiser l'execution des scripts j'ai utilisé crontab (Linux Crontab is a powerful job scheduler that automates repetitive tasks by allowing users to schedule commands and scripts ) 
+```ini 
+crontab -e
+
+```
+
+#### 0 0 * * 5   le deux premier zeros (0 0 ) signifie minuit  et le 5 signifie le 5 eme jour de la semaine cád execute le script chaque vendredi a minuit
+
+```ini 
+0 0 * * 5 ansible-playbook /etc/ansible/big.yml > /var/log/ansible_cron.log 2>&1
+0 0 * * 5 ansible-playbook /etc/ansible/cisco.yml > /var/log/ansible_cron.log 2>&1
+0 0 * * 5 ansible-playbook /etc/ansible/dell.yml > /var/log/ansible_cron.log 2>&1
+0 0 * * 5 ansible-playbook /etc/ansible/forti.yml > /var/log/ansible_cron.log 2>&1
+0 0 * * 5 ansible-playbook /etc/ansible/palo.yml > /var/log/ansible_cron.log 2>&1
+
+```
+
+
+#  set up sftp server
 
 
 
