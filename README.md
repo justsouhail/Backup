@@ -59,7 +59,7 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 | Switch       | Cisco      | SW   | 192.168.11.28 |
 | Router       | Cisco      | R1           | 192.168.11.25 |
 | Router       | Cisco      | R2           | 192.168.11.26 |
-| Switch       | Dell      | dell1           | 192.168.11.166 |
+| Switch       | Dell      | dell1           | 192.168.11.169 |
 | Server      | Ubuntu      | Control node           | 192.168.11.135 |
 | Server      | Ubuntu      |  SFTP         |  192.168.11.165|
 
