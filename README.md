@@ -105,15 +105,10 @@ Create User
 
 
 ## 4- F5 User
-![Project Logo](assets/userpalo.png)
+![Project Logo](assets/f5usermode.png)
 
 ```ini
-Create Use back
-> configure
-# set mgt-config users <name> password
-# set mgt-config users <name> permissions role-based devicereader
-# commit
-# exit
+The user with backup privilege  is Administrator
 ```
 
 
