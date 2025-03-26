@@ -4,10 +4,12 @@
   connection: local
   gather_facts: no
   strategy: linear
-  vars_files:
-    - ~/rest_creds.yml
 
   tasks:
+    - name: Get timestamp
+      command: date +%Y-%m-%d
+      register: timestamp
+
     - name: Get REST API Key
       uri:
         validate_certs: no
@@ -33,14 +35,22 @@
     - name: Save initial config
       copy:
         content: "{{ response_pa_config.content }}"
-        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        dest: "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
 
     - name: Remove unwanted closing tags
       replace:
-        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        path: "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
         regexp: '</result></response>'
         replace: ''
 
     - name: Remove extra newlines at end of file
       shell: |
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}.xml"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "/etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml"
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/palo_folder/{{ inventory_hostname }}_{{ timestamp.stdout }}.xml  /home/storage/backup/palo
+        exit
+        EOF
+      no_log: true 

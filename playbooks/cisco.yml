@@ -16,35 +16,59 @@
       command: date +%Y-%m-%d
       register: timestamp
 
-    - name: Configurable backup path
-      cisco.ios.ios_config:
-        src: ios_template.j2
-        backup: true
-        backup_options:
-          filename: "{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
-          dir_path: "/etc/ansible/cisco_folder/RT"
+    - name: Get router running config
+      cisco.ios.ios_command:
+        commands: show running-config
+      register: router_config
 
-- name: General Config for Switches
+    - name: Save config to local temp file
+      ansible.builtin.copy:
+        content: "{{ router_config.stdout[0] }}"
+        dest: "/etc/ansible/cisco_folder/RT/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+      delegate_to: localhost
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/cisco_folder/RT/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/RT
+        exit
+        EOF
+      no_log: true 
+
+
+- name: Backup Switch Config 
   hosts: switches
-  gather_facts: yes 
-  vars:
-    hostname: "{{ inventory_hostname }}"
+  gather_facts: no
+
   tasks:
-    # - name: Add Banner
-    #   cisco.ios.ios_banner:
-    #     banner: login
-    #     text: |
-    #       Wasssssssssssuuuuuuuuuup
-    #     state: present
-    
     - name: Get timestamp
       command: date +%Y-%m-%d
       register: timestamp
+      delegate_to: localhost
+    
+    - name: Get switch running config
+      cisco.ios.ios_command:
+        commands: show running-config
+      register: switch_config
+    
+    - name: Save config to local temp file
+      ansible.builtin.copy:
+        content: "{{ switch_config.stdout[0] }}"
+        dest: "/etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+      delegate_to: localhost
 
-    - name: Configurable backup path
-      cisco.ios.ios_config:
-        src: ios_template.j2
-        backup: true
-        backup_options:
-          filename: "{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
-          dir_path: "/etc/ansible/cisco_folder/SW"
+
+    # - name: Copy file using sftp
+    #   shell: |
+    #     echo "put /tmp/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg /home/storage/backup/" | sftp souhail_backup@192.168.11.165
+
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/SW
+        exit
+        EOF
+      no_log: true 
+    
+  
+  

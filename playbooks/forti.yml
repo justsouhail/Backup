@@ -1,7 +1,7 @@
 ---
 - name: General Config
   hosts: fortigates
-  gather_facts: true
+  gather_facts: false
   collections:
     - fortinet.fortios
 
@@ -28,6 +28,13 @@
     - name: Save Full Configuration 
       copy:
         content: '{{ full_config.meta.raw  }}'
-        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ ansible_date_time.date }}.cfg'
+        dest: '/etc/ansible/forti_folder/{{inventory_hostname}}_{{ timestamp.stdout }}.cfg'
 
 
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/forti_folder/{{inventory_hostname}}_{{ timestamp.stdout }}.cfg  /home/storage/backup/forti
+        exit
+        EOF
+      no_log: true 

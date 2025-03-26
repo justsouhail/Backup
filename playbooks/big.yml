@@ -1,0 +1,42 @@
+---
+- name: Create and Download UCS backup for F5 BIG-IP
+  hosts: lb
+  connection: local
+  vars:
+    backup_file_name: "{{ inventory_hostname }}-{{ ansible_date_time.date }}"
+    provider:
+      user: "{{ inventory_user }}"
+      server: "{{ inventory_host }}"
+      server_port: "{{ inventory_port }}"
+      password: "{{ inventory_pass }}"
+      transport: rest
+      timeout: 600
+      validate_certs: no
+  gather_facts: true
+  
+  tasks:
+    - name: Create a new UCS and Download
+      f5networks.f5_modules.bigip_ucs_fetch:
+        async_timeout: 1200
+        src: "{{ backup_file_name }}.ucs"
+        dest: "/etc/ansible/F5/{{ backup_file_name }}.ucs"
+        create_on_missing: true
+        only_create_file: false
+        fail_on_missing: false
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      
+    - name: Remove the UCS from the device
+      f5networks.f5_modules.bigip_ucs:
+        ucs: "{{ backup_file_name }}.ucs"
+        state: absent
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      
+    - name: Copy file 
+      shell: |
+        sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
+        put /etc/ansible/F5/{{ backup_file_name }}.ucs  /home/storage/backup/
+        exit
+        EOF
+      no_log: true 
