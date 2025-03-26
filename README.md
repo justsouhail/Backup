@@ -564,10 +564,11 @@ sudo chown souhail_backup:sftp /home/storage/backup
 ```
 #### configure sftp 
 
-nano /etc/ssh/sshd_config
 ![Project Logo](assets/sftpmode.png)
 
-```ini 
+```ini
+nano /etc/ssh/sshd_config
+
  Match Group ansible_backup
 ForceCommand internal-sftp
 PasswordAuthentication yes
