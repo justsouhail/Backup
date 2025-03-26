@@ -117,7 +117,6 @@ The user with backup privilege  is Administrator
 
 
 ## 5- dell  User
-![Project Logo](assets/userpalo.png)
 
 ```ini
 
