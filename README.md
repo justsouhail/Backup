@@ -7,7 +7,8 @@
 - [Introduction](#introduction)  
 - [Topology](#topology)  
 - [Steps](#steps)  
-- [Device IP Address Table](#device-ip-address-table)  
+- [Device IP Address Table](#device-ip-address-table)
+- [Setting up Users on network devices](#setting-up-users-on-network-devices)
 - [Hosts Inventory](#hosts-inventory)  
 - [Playbooks](#Playbooks)
 - [Schedule automated backups crontab](#Schedule-automated-backups-crontab)
@@ -65,6 +66,7 @@ I'm developing an Ansible-based backup automation project for firewalls (Fortine
 | Server      | Ubuntu      | Control node           | 192.168.11.135 |
 | Server      | Ubuntu      |  SFTP         |  192.168.11.165|
 
+# 
 
 # Setting up Users on network devices 
 
@@ -124,6 +126,7 @@ username souhail password **** role sysadmin priv-lvl 15 password-expiry 180
 ```
 
 
+# 
 
 
 
@@ -201,6 +204,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
 
 
 ```
+# 
 
 # Playbooks
 
@@ -526,6 +530,7 @@ f5 inventory_host=192.168.11.170 inventory_user=backup_user inventory_pass=Big@1
       no_log: true 
 
 ```
+# 
 
 
 #  Schedule automated backups crontab
@@ -549,8 +554,9 @@ crontab -e
 
 ```
 
+# 
 
-#  set up sftp server
+#  Set up sftp server
 #### Add group & User 
 ```ini 
  groupadd  backup_ansible
