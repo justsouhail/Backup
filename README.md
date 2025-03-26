@@ -9,7 +9,9 @@
 - [Steps](#steps)  
 - [Device IP Address Table](#device-ip-address-table)  
 - [Hosts Inventory](#hosts-inventory)  
-- [Fortigate](#fortigate)  
+- [Playbooks](#Playbooks)
+- [Schedule automated backups crontab](#Schedule-automated-backups-crontab)
+- [set up sftp server](#set-up-sftp-server)
 
 
 
@@ -551,8 +553,29 @@ crontab -e
 #  set up sftp server
 #### Add group & User 
 ```ini 
- groupadd sftp
- userad  
+ groupadd  backup_ansible
+ useradd souhail_backup
+sudo chown souhail_backup:sftp /home/storage/backup
 ```
+#### configure sftp 
 
+nano /etc/ssh/sshd_config
+![Project Logo](assets/sftpmode.png)
+
+```ini 
+ Match Group ansible_backup
+ForceCommand internal-sftp
+PasswordAuthentication yes
+ChrootDirectory /var/sftp
+PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+
+```
+#### test 
+![Project Logo](assets/sftpmode2.png)
+
+
+# password management ....
 
