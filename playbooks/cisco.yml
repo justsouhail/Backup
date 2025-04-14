@@ -33,7 +33,6 @@
         put /tmp/back/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/RT
         exit
         EOF
-      no_log: true 
 
 
 - name: Backup Switch Config 
@@ -68,7 +67,6 @@
         put /tmp/back/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/SW
         exit
         EOF
-      no_log: true 
     
   
   
