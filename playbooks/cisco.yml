@@ -54,7 +54,7 @@
     - name: Save config to local temp file
       ansible.builtin.copy:
         content: "{{ switch_config.stdout[0] }}"
-        dest: "/etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
+        dest: "/tmp/back/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg"
       delegate_to: localhost
 
 
@@ -65,7 +65,7 @@
     - name: Copy file 
       shell: |
         sshpass -p "123" sftp souhail_backup@192.168.11.165 <<EOF
-        put /etc/ansible/cisco_folder/SW/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/SW
+        put /tmp/back/{{ inventory_hostname }}_{{ timestamp.stdout }}.cfg  /home/storage/backup/cisco/SW
         exit
         EOF
       no_log: true 
