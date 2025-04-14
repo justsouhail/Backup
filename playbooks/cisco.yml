@@ -41,7 +41,7 @@
   hosts: switches
   gather_facts: no
   vars_files:
-    - pass.yml
+  - /etc/ansible/pass.yml
   tasks:
     - name: Get timestamp
       command: date +%Y-%m-%d
