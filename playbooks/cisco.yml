@@ -4,6 +4,8 @@
   gather_facts: true  
   vars:
     hostname: "{{ inventory_hostname }}"
+  vars_files:
+    - pass.yml
   tasks:
     # - name: Add Banner
     #   cisco.ios.ios_banner:
